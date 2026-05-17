@@ -159,11 +159,6 @@ cat-ai/
 │   │                                  # - venv/
 │   │                                  # - __pycache__/
 │   │                                  # - *.pyc
-│
-└── config.yaml                        # Configuration file (optional)
-                                       # - Model settings
-                                       # - Training parameters
-                                       # - Device configuration
 ```
 
 ### File Descriptions
@@ -2038,10 +2033,3 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-
----
-
-<div align="center">
-  <p><strong>DeepNova AI</strong> | Built with PyTorch | Apache 2.0 License</p>
-  <p><a href="https://github.com/deepnova-ai/deepnova">GitHub</a></p>
-</div>"# deepnova" 
