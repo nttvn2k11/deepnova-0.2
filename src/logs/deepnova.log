@@ -1,0 +1,136 @@
+2026-05-17 14:42:20 | INFO    | DeepNova             | check_dependencies   | ================================================================================
+2026-05-17 14:42:20 | INFO    | DeepNova             | check_dependencies   | STARTING DEPENDENCY CHECK
+2026-05-17 14:42:20 | INFO    | DeepNova             | check_dependencies   | ================================================================================
+2026-05-17 14:42:20 | INFO    | DeepNova             | check_dependencies   | Checking 7 REQUIRED dependencies...
+2026-05-17 14:42:26 | INFO    | DeepNova             | check_dependencies   | OK REQUIRED: torch                | Install: torch>=2.1.0
+2026-05-17 14:42:30 | INFO    | DeepNova             | check_dependencies   | OK REQUIRED: transformers         | Install: transformers>=4.36.0
+2026-05-17 14:42:30 | INFO    | DeepNova             | check_dependencies   | OK REQUIRED: sentencepiece        | Install: sentencepiece>=0.1.99
+2026-05-17 14:42:30 | INFO    | DeepNova             | check_dependencies   | OK REQUIRED: safetensors          | Install: safetensors>=0.4.0
+2026-05-17 14:42:30 | INFO    | DeepNova             | check_dependencies   | OK REQUIRED: tqdm                 | Install: tqdm>=4.66.0
+2026-05-17 14:42:30 | INFO    | DeepNova             | check_dependencies   | OK REQUIRED: numpy                | Install: numpy>=1.24.0
+2026-05-17 14:42:30 | INFO    | DeepNova             | check_dependencies   | OK REQUIRED: psutil               | Install: psutil>=5.9.0
+2026-05-17 14:42:30 | INFO    | DeepNova             | check_dependencies   | 
+Checking 11 OPTIONAL dependencies...
+2026-05-17 14:42:32 | INFO    | DeepNova             | check_dependencies   | OK OPTIONAL: wandb                | Install: wandb>=0.16.0
+2026-05-17 14:42:32 | INFO    | DeepNova             | check_dependencies   | OK OPTIONAL: tensorboard          | Install: tensorboard>=2.14.0
+2026-05-17 14:42:32 | INFO    | DeepNova             | check_dependencies   | OK OPTIONAL: uvicorn              | Install: uvicorn>=0.24.0
+2026-05-17 14:42:32 | INFO    | DeepNova             | check_dependencies   | OK OPTIONAL: einops               | Install: einops>=0.7.0
+2026-05-17 14:42:32 | INFO    | DeepNova             | check_dependencies   | 
+Dependency Summary: 7/7 required, 4/11 optional
+2026-05-17 14:42:32 | INFO    | DeepNova             | check_dependencies   | ================================================================================
+2026-05-17 14:42:34 | INFO    | DeepNova             | <module>             | PyTorch imported successfully
+2026-05-17 14:42:34 | INFO    | DeepNova             | <module>             | Weights & Biases loaded
+2026-05-17 14:42:35 | INFO    | DeepNova             | <module>             | TensorBoard loaded
+2026-05-17 14:42:35 | INFO    | DeepNova             | <module>             | SentencePiece loaded
+2026-05-17 14:42:35 | INFO    | DeepNova             | <module>             | Einops loaded
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        | ================================================================================
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        | VALIDATING ENHANCED MODEL CONFIGURATION
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        | ================================================================================
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        | Using dtype: bf16 -> torch.bfloat16
+2026-05-17 14:42:36 | WARNING | DeepNova             | __post_init__        | Megablocks not available, falling back to reference MoE implementation
+2026-05-17 14:42:36 | WARNING | DeepNova             | __post_init__        | FlashAttention not available, falling back to SDPA
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        | 
+Enhanced Model Configuration Summary:
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   Architecture: deepseek-v3-lite v5.0.0
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   Hidden Dim: 2,048, Layers: 27, Heads: 16, Head Dim: 128
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   Vocab Size: 102,400, Max Seq Len: 32,768
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   MoE: 64 routed + 2 shared = 66 total experts
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   Top-K: 6 experts active per token
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   Device: cpu, Dtype: bf16, Mixed Precision: True
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        | 
+Enhanced Features:
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   Parallel MoE+Dense: False (mode=add)
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   GLM Integration: False
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   Shared Expert: True
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   Adaptive Router: True
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   Dynamic Depth: False
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   Multi-Token Prediction: False
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   FP8 Training: False
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        |   Expert Parallelism: False
+2026-05-17 14:42:36 | INFO    | DeepNova             | __post_init__        | ================================================================================
+2026-05-17 14:42:39 | DEBUG   | httpcore.connection  | trace                | connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=10 socket_options=None
+2026-05-17 14:42:39 | DEBUG   | httpcore.connection  | trace                | connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x0000019B26C8AE40>
+2026-05-17 14:42:39 | DEBUG   | httpcore.connection  | trace                | start_tls.started ssl_context=<ssl.SSLContext object at 0x0000019B26D212E0> server_hostname='huggingface.co' timeout=10
+2026-05-17 14:42:40 | DEBUG   | httpcore.connection  | trace                | start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x0000019B26C3B4D0>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.complete return_value=(b'HTTP/1.1', 307, b'Temporary Redirect', [(b'Content-Type', b'text/plain; charset=utf-8'), (b'Content-Length', b'274'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 17 May 2026 07:42:40 GMT'), (b'Location', b'/api/resolve-cache/models/Xenova/bert-base-multilingual-cased/17016e764a76e30ed904bc251df4510f27b7f23f/config.json?%2FXenova%2Fbert-base-multilingual-cased%2Fresolve%2Fmain%2Fconfig.json=&etag=%226f256190b047c42f02adf954eb1be598b630166e%22'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6a097170-4ea28ec2725f5a775f447873;86172f2b-e18c-42fa-80a8-d45a7e957b5a'), (b'RateLimit', b'"resolvers";r=2999;t=20'), (b'RateLimit-Policy', b'"fixed window";"resolvers";q=3000;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin, Accept'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Repo-Commit', b'17016e764a76e30ed904bc251df4510f27b7f23f'), (b'Accept-Ranges', b'bytes'), (b'X-Hub-Cache', b'MISS'), (b'Content-Disposition', b'inline; filename*=UTF-8\'\'config.json; filename="config.json";'), (b'Content-Security-Policy', b"default-src 'none'; sandbox"), (b'X-Linked-ETag', b'"6f256190b047c42f02adf954eb1be598b630166e"'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 86b2e4cf2f20499494a5194c5c469624.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'SGN50-P3'), (b'X-Amz-Cf-Id', b'zKcZlYoQvZY-6XjU4RFWkUrZPJ5hNbN_I7AbkwqBNp-Knw3g0qr6Rw==')])
+2026-05-17 14:42:40 | INFO    | httpx                | _send_single_request | HTTP Request: HEAD https://huggingface.co/Xenova/bert-base-multilingual-cased/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_body.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_body.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | response_closed.started
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | response_closed.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'text/plain; charset=utf-8'), (b'Content-Length', b'809'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 17 May 2026 07:23:31 GMT'), (b'ETag', b'"6f256190b047c42f02adf954eb1be598b630166e"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6a096cf3-3358f2703d535883305b1c49;bcb36097-102b-46e7-8425-e482da727253'), (b'RateLimit', b'"resolvers";r=2998;t=269'), (b'RateLimit-Policy', b'"fixed window";"resolvers";q=3000;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Repo-Commit', b'17016e764a76e30ed904bc251df4510f27b7f23f'), (b'Accept-Ranges', b'bytes'), (b'X-Hub-Cache', b'MISS'), (b'Content-Disposition', b'inline; filename*=UTF-8\'\'config.json; filename="config.json";'), (b'Content-Security-Policy', b"default-src 'none'; sandbox"), (b'Vary', b'Origin'), (b'X-Cache', b'Hit from cloudfront'), (b'Via', b'1.1 86b2e4cf2f20499494a5194c5c469624.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'SGN50-P3'), (b'X-Amz-Cf-Id', b'-XAmh0ECvjHQoVh-thIVUsKn7Jfmb9WLyCTiF60mQAIflyLK005HAA=='), (b'Age', b'1149')])
+2026-05-17 14:42:40 | INFO    | httpx                | _send_single_request | HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Xenova/bert-base-multilingual-cased/17016e764a76e30ed904bc251df4510f27b7f23f/config.json "HTTP/1.1 200 OK"
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_body.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_body.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | response_closed.started
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | response_closed.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.complete return_value=(b'HTTP/1.1', 307, b'Temporary Redirect', [(b'Content-Type', b'text/plain; charset=utf-8'), (b'Content-Length', b'294'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 17 May 2026 07:42:40 GMT'), (b'Location', b'/api/resolve-cache/models/Xenova/bert-base-multilingual-cased/17016e764a76e30ed904bc251df4510f27b7f23f/tokenizer_config.json?%2FXenova%2Fbert-base-multilingual-cased%2Fresolve%2Fmain%2Ftokenizer_config.json=&etag=%22d12bef92cd1e82f321e02d596e6f9ada86579755%22'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6a097170-44501429030891bd08803fa4;2624b9ce-5a58-4182-b367-751be4340054'), (b'RateLimit', b'"resolvers";r=2998;t=20'), (b'RateLimit-Policy', b'"fixed window";"resolvers";q=3000;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin, Accept'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Repo-Commit', b'17016e764a76e30ed904bc251df4510f27b7f23f'), (b'Accept-Ranges', b'bytes'), (b'X-Hub-Cache', b'MISS'), (b'Content-Disposition', b'inline; filename*=UTF-8\'\'tokenizer_config.json; filename="tokenizer_config.json";'), (b'Content-Security-Policy', b"default-src 'none'; sandbox"), (b'X-Linked-ETag', b'"d12bef92cd1e82f321e02d596e6f9ada86579755"'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 86b2e4cf2f20499494a5194c5c469624.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'SGN50-P3'), (b'X-Amz-Cf-Id', b'k6X_jyulXoQuAF8YNfOjNgxDdidKyF8ZN0g5Wv6Bqdjk4d_hCmRe_A==')])
+2026-05-17 14:42:40 | INFO    | httpx                | _send_single_request | HTTP Request: HEAD https://huggingface.co/Xenova/bert-base-multilingual-cased/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_body.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_body.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | response_closed.started
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | response_closed.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'text/plain; charset=utf-8'), (b'Content-Length', b'315'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 17 May 2026 07:23:32 GMT'), (b'ETag', b'"d12bef92cd1e82f321e02d596e6f9ada86579755"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6a096cf4-392c73f77b63f9692abb9185;3eb6ea1e-4e64-4790-b04b-10d6906af5a9'), (b'RateLimit', b'"resolvers";r=2995;t=268'), (b'RateLimit-Policy', b'"fixed window";"resolvers";q=3000;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Repo-Commit', b'17016e764a76e30ed904bc251df4510f27b7f23f'), (b'Accept-Ranges', b'bytes'), (b'X-Hub-Cache', b'MISS'), (b'Content-Disposition', b'inline; filename*=UTF-8\'\'tokenizer_config.json; filename="tokenizer_config.json";'), (b'Content-Security-Policy', b"default-src 'none'; sandbox"), (b'Vary', b'Origin'), (b'X-Cache', b'Hit from cloudfront'), (b'Via', b'1.1 86b2e4cf2f20499494a5194c5c469624.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'SGN50-P3'), (b'X-Amz-Cf-Id', b'gwnRnxLoumW4MCyIA7fxm3fJeQvFDT9Z0FJwvFTCD_mnnvLQwJy_8Q=='), (b'Age', b'1148')])
+2026-05-17 14:42:40 | INFO    | httpx                | _send_single_request | HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Xenova/bert-base-multilingual-cased/17016e764a76e30ed904bc251df4510f27b7f23f/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_body.started request=<Request [b'HEAD']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_body.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | response_closed.started
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | response_closed.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.started request=<Request [b'GET']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.started request=<Request [b'GET']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.started request=<Request [b'GET']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.complete return_value=(b'HTTP/1.1', 404, b'Not Found', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'64'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 17 May 2026 07:42:40 GMT'), (b'ETag', b'W/"40-09f9IAqP13xarAhQxFS2W8rvRkM"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6a097170-0d7a5d242692c3b1017e39a7;632a27ad-3832-4460-92f6-b39fa1253e63'), (b'RateLimit', b'"api";r=499;t=20'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Error-Code', b'EntryNotFound'), (b'X-Error-Message', b'additional_chat_templates does not exist on "main"'), (b'X-Cache', b'Error from cloudfront'), (b'Via', b'1.1 86b2e4cf2f20499494a5194c5c469624.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'SGN50-P3'), (b'X-Amz-Cf-Id', b'HSig7YRVUXtHurHumhuwA_LRfK55emTbt8hco3UC85E50wLHb7KeQQ==')])
+2026-05-17 14:42:40 | INFO    | httpx                | _send_single_request | HTTP Request: GET https://huggingface.co/api/models/Xenova/bert-base-multilingual-cased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_body.started request=<Request [b'GET']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_body.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | response_closed.started
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | response_closed.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.started request=<Request [b'GET']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_headers.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.started request=<Request [b'GET']>
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | send_request_body.complete
+2026-05-17 14:42:40 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.started request=<Request [b'GET']>
+2026-05-17 14:42:41 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 17 May 2026 07:42:41 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"d83-DTmPzMfYr8oIvmympJueJp0IXUM"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6a097171-57c9bfe8708c9bbd44f4cf4d;c2e5219d-4426-4a3d-831a-30743692b65d'), (b'RateLimit', b'"api";r=498;t=19'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 86b2e4cf2f20499494a5194c5c469624.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'SGN50-P3'), (b'X-Amz-Cf-Id', b'15TK6356j0f3QQzVYH9BFzCjidHWte8MZEn8LodSbnUZhJLu4uvZnA==')])
+2026-05-17 14:42:41 | INFO    | httpx                | _send_single_request | HTTP Request: GET https://huggingface.co/api/models/Xenova/bert-base-multilingual-cased/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-05-17 14:42:41 | DEBUG   | httpcore.http11      | trace                | receive_response_body.started request=<Request [b'GET']>
+2026-05-17 14:42:41 | DEBUG   | httpcore.http11      | trace                | receive_response_body.complete
+2026-05-17 14:42:41 | DEBUG   | httpcore.http11      | trace                | response_closed.started
+2026-05-17 14:42:41 | DEBUG   | httpcore.http11      | trace                | response_closed.complete
+2026-05-17 14:42:41 | DEBUG   | httpcore.http11      | trace                | send_request_headers.started request=<Request [b'GET']>
+2026-05-17 14:42:41 | DEBUG   | httpcore.http11      | trace                | send_request_headers.complete
+2026-05-17 14:42:41 | DEBUG   | httpcore.http11      | trace                | send_request_body.started request=<Request [b'GET']>
+2026-05-17 14:42:41 | DEBUG   | httpcore.http11      | trace                | send_request_body.complete
+2026-05-17 14:42:41 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.started request=<Request [b'GET']>
+2026-05-17 14:42:42 | DEBUG   | httpcore.http11      | trace                | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 17 May 2026 07:42:42 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"6df-2lLjSmQF4r0Lzg3pnLL4NJbMe9c"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6a097172-0fd3f4231e5f984848071496;42992294-8ff7-4427-921b-f0fda274c149'), (b'RateLimit', b'"api";r=497;t=18'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 86b2e4cf2f20499494a5194c5c469624.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'SGN50-P3'), (b'X-Amz-Cf-Id', b'21S97pDiQ6KmgUU6BvIATSHyXvxk2imEjoTs_Z-xh5WVAw7chGWDsg==')])
+2026-05-17 14:42:42 | INFO    | httpx                | _send_single_request | HTTP Request: GET https://huggingface.co/api/models/Xenova/bert-base-multilingual-cased "HTTP/1.1 200 OK"
+2026-05-17 14:42:42 | DEBUG   | httpcore.http11      | trace                | receive_response_body.started request=<Request [b'GET']>
+2026-05-17 14:42:42 | DEBUG   | httpcore.http11      | trace                | receive_response_body.complete
+2026-05-17 14:42:42 | DEBUG   | httpcore.http11      | trace                | response_closed.started
+2026-05-17 14:42:42 | DEBUG   | httpcore.http11      | trace                | response_closed.complete
+2026-05-17 14:42:42 | INFO    | DeepNova             | __init__             | Loaded HuggingFace tokenizer as fallback
+2026-05-17 14:42:54 | INFO    | DeepNova             | cleanup_memory       | Starting memory cleanup...
+2026-05-17 14:42:55 | INFO    | DeepNova             | cleanup_memory       | Starting memory cleanup...
+2026-05-17 14:42:55 | DEBUG   | httpcore.connection  | trace                | close.started
+2026-05-17 14:42:55 | DEBUG   | httpcore.connection  | trace                | close.complete

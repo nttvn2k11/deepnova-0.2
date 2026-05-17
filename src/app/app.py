@@ -1,0 +1,592 @@
+
+
+import tkinter as tk
+from tkinter import ttk, scrolledtext, messagebox, filedialog
+import threading
+import os
+import sys
+from datetime import datetime
+
+try:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from model import (
+        DeepNovaAI, Transformer, ProductionTokenizer, ModelArgs,
+        load_model, get_best_device, get_memory_info,
+        cleanup_memory, logger, torch
+    )
+    MODEL_OK = True
+except ImportError as e:
+    print(f"Error: {e}")
+    MODEL_OK = False
+    sys.exit(1)
+
+
+class DeepNovaApp:
+    """Desktop application - white background, blue buttons"""
+    
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("DeepNova AI")
+        self.root.geometry("1100x750")
+        self.root.configure(bg="#ffffff")
+        self.root.minsize(900, 600)
+        
+        # Variables
+        self.model = None
+        self.tokenizer = None
+        self.args = None
+        self.deepnova = None
+        self.model_loaded = False
+        self.loading = False
+        self.generating = False
+        self.stop_flag = False
+        
+        # Settings
+        self.temp = tk.DoubleVar(value=0.7)
+        self.max_tokens = tk.IntVar(value=500)
+        self.model_size = tk.StringVar(value="lite")
+        
+        # Create UI
+        self.setup_ui()
+        self.setup_shortcuts()
+        
+        # Auto load
+        self.root.after(500, self.auto_load)
+        
+        # Update memory periodically
+        self.update_memory()
+    
+    def setup_ui(self):
+        """Create all UI elements"""
+        
+        # Main container
+        main = tk.Frame(self.root, bg="#ffffff")
+        main.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Top bar
+        self.create_top_bar(main)
+        
+        # Main content area
+        content = tk.Frame(main, bg="#ffffff")
+        content.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        # Left: Chat area
+        left = tk.Frame(content, bg="#ffffff")
+        left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        self.create_chat_area(left)
+        self.create_input_area(left)
+        
+        # Right: Sidebar
+        right = tk.Frame(content, bg="#f5f5f5", width=280)
+        right.pack(side=tk.RIGHT, fill=tk.Y, padx=(10, 0))
+        right.pack_propagate(False)
+        
+        self.create_sidebar(right)
+        
+        # Status bar
+        self.create_status_bar(main)
+    
+    def create_top_bar(self, parent):
+        """Create top bar"""
+        top = tk.Frame(parent, bg="#2196f3", height=50)
+        top.pack(fill=tk.X)
+        top.pack_propagate(False)
+        
+        title = tk.Label(top, text="DeepNova AI", 
+                        font=("Segoe UI", 16, "bold"),
+                        bg="#2196f3", fg="white")
+        title.pack(side=tk.LEFT, padx=20, pady=10)
+        
+        version = tk.Label(top, text="v5.0", font=("Segoe UI", 10),
+                          bg="#2196f3", fg="white")
+        version.pack(side=tk.LEFT, padx=(0, 20))
+        
+        self.status_dot = tk.Label(top, text="●", font=("Segoe UI", 12),
+                                   bg="#2196f3", fg="#ff9800")
+        self.status_dot.pack(side=tk.RIGHT, padx=(0, 5))
+        
+        self.status_text = tk.Label(top, text="Not Ready", font=("Segoe UI", 9),
+                                    bg="#2196f3", fg="white")
+        self.status_text.pack(side=tk.RIGHT, padx=(0, 20))
+    
+    def create_chat_area(self, parent):
+        """Create chat display area"""
+        # Chat display
+        self.chat = scrolledtext.ScrolledText(
+            parent, wrap=tk.WORD, font=("Segoe UI", 10),
+            bg="#ffffff", fg="#333333", relief="flat",
+            borderwidth=0, highlightthickness=0
+        )
+        self.chat.pack(fill=tk.BOTH, expand=True)
+        self.chat.config(state=tk.DISABLED)
+        
+        # Text tags
+        self.chat.tag_config("user", foreground="#2196f3", font=("Segoe UI", 10, "bold"))
+        self.chat.tag_config("assistant", foreground="#4caf50", font=("Segoe UI", 10, "bold"))
+        self.chat.tag_config("system", foreground="#ff9800", font=("Segoe UI", 9, "italic"))
+        
+        # Welcome
+        self.add_message("system", "Welcome! I am DeepNova. How can I help you?")
+    
+    def create_input_area(self, parent):
+        """Create input area"""
+        frame = tk.Frame(parent, bg="#ffffff")
+        frame.pack(fill=tk.X, pady=(10, 0))
+        
+        # Input text
+        self.input = scrolledtext.ScrolledText(
+            frame, height=4, wrap=tk.WORD, font=("Segoe UI", 10),
+            bg="#ffffff", fg="#333333", relief="solid",
+            borderwidth=1, highlightthickness=0
+        )
+        self.input.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
+        
+        # Button frame
+        btn_frame = tk.Frame(frame, bg="#ffffff")
+        btn_frame.pack(fill=tk.X)
+        
+        self.send_btn = tk.Button(btn_frame, text="Send", command=self.send,
+                                  font=("Segoe UI", 10, "bold"),
+                                  bg="#2196f3", fg="white", padx=25, pady=5,
+                                  relief="flat", cursor="hand2")
+        self.send_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.stop_btn = tk.Button(btn_frame, text="Stop", command=self.stop,
+                                  font=("Segoe UI", 10),
+                                  bg="#ff9800", fg="white", padx=25, pady=5,
+                                  relief="flat", cursor="hand2", state=tk.DISABLED)
+        self.stop_btn.pack(side=tk.LEFT)
+        
+        hint = tk.Label(btn_frame, text="Ctrl+Enter to send", font=("Segoe UI", 8),
+                        bg="#ffffff", fg="#999999")
+        hint.pack(side=tk.RIGHT)
+    
+    def create_sidebar(self, parent):
+        """Create sidebar"""
+        # Model section
+        model_frame = tk.LabelFrame(parent, text="Model", font=("Segoe UI", 10, "bold"),
+                                    bg="#f5f5f5", fg="#333333", relief="flat")
+        model_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Model size
+        size_frame = tk.Frame(model_frame, bg="#f5f5f5")
+        size_frame.pack(fill=tk.X, padx=10, pady=5)
+        tk.Label(size_frame, text="Size:", bg="#f5f5f5", font=("Segoe UI", 9)).pack(side=tk.LEFT)
+        size_combo = ttk.Combobox(size_frame, textvariable=self.model_size,
+                                   values=["lite", "base"], state="readonly", width=10)
+        size_combo.pack(side=tk.RIGHT)
+        
+        # Load button
+        self.load_btn = tk.Button(model_frame, text="Load Model", command=self.load_model,
+                                  bg="#2196f3", fg="white", font=("Segoe UI", 9),
+                                  padx=10, pady=5, relief="flat")
+        self.load_btn.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Model info
+        self.model_info = tk.Text(model_frame, height=4, width=25,
+                                  bg="white", fg="#333333", font=("Segoe UI", 8),
+                                  relief="flat", padx=5, pady=5)
+        self.model_info.pack(padx=10, pady=5, fill=tk.X)
+        
+        # Generation section
+        gen_frame = tk.LabelFrame(parent, text="Generation", font=("Segoe UI", 10, "bold"),
+                                  bg="#f5f5f5", fg="#333333", relief="flat")
+        gen_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Temperature
+        temp_frame = tk.Frame(gen_frame, bg="#f5f5f5")
+        temp_frame.pack(fill=tk.X, padx=10, pady=5)
+        tk.Label(temp_frame, text="Temperature:", bg="#f5f5f5", font=("Segoe UI", 9)).pack(side=tk.LEFT)
+        scale = tk.Scale(temp_frame, from_=0.1, to=1.5, resolution=0.05,
+                        orient=tk.HORIZONTAL, variable=self.temp,
+                        bg="#f5f5f5", length=120)
+        scale.pack(side=tk.RIGHT)
+        
+        # Max tokens
+        tokens_frame = tk.Frame(gen_frame, bg="#f5f5f5")
+        tokens_frame.pack(fill=tk.X, padx=10, pady=5)
+        tk.Label(tokens_frame, text="Max Tokens:", bg="#f5f5f5", font=("Segoe UI", 9)).pack(side=tk.LEFT)
+        tk.Scale(tokens_frame, from_=100, to=2000, resolution=50,
+                orient=tk.HORIZONTAL, variable=self.max_tokens,
+                bg="#f5f5f5", length=120).pack(side=tk.RIGHT)
+        
+        # Knowledge section
+        know_frame = tk.LabelFrame(parent, text="Knowledge", font=("Segoe UI", 10, "bold"),
+                                   bg="#f5f5f5", fg="#333333", relief="flat")
+        know_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        btn1 = tk.Button(know_frame, text="Learn from File", command=self.learn_file,
+                         bg="#4caf50", fg="white", font=("Segoe UI", 9),
+                         padx=10, pady=5, relief="flat")
+        btn1.pack(fill=tk.X, padx=10, pady=5)
+        
+        btn2 = tk.Button(know_frame, text="Recall Knowledge", command=self.recall,
+                         bg="#2196f3", fg="white", font=("Segoe UI", 9),
+                         padx=10, pady=5, relief="flat")
+        btn2.pack(fill=tk.X, padx=10, pady=5)
+        
+        btn3 = tk.Button(know_frame, text="Statistics", command=self.stats,
+                         bg="#ff9800", fg="white", font=("Segoe UI", 9),
+                         padx=10, pady=5, relief="flat")
+        btn3.pack(fill=tk.X, padx=10, pady=5)
+        
+        btn4 = tk.Button(know_frame, text="Clear Memory", command=self.clear_memory,
+                         bg="#f44336", fg="white", font=("Segoe UI", 9),
+                         padx=10, pady=5, relief="flat")
+        btn4.pack(fill=tk.X, padx=10, pady=5)
+    
+    def create_status_bar(self, parent):
+        """Create status bar"""
+        status = tk.Frame(parent, bg="#f5f5f5", height=25)
+        status.pack(fill=tk.X, side=tk.BOTTOM)
+        status.pack_propagate(False)
+        
+        self.status_msg = tk.Label(status, text="Ready", bg="#f5f5f5", fg="#666666",
+                                   font=("Segoe UI", 8))
+        self.status_msg.pack(side=tk.LEFT, padx=10)
+        
+        self.mem_label = tk.Label(status, text="", bg="#f5f5f5", fg="#666666",
+                                  font=("Segoe UI", 8))
+        self.mem_label.pack(side=tk.RIGHT, padx=10)
+    
+    def setup_shortcuts(self):
+        """Setup keyboard shortcuts"""
+        self.input.bind("<Control-Return>", lambda e: self.send())
+        self.input.bind("<Command-Return>", lambda e: self.send())
+    
+    def add_message(self, sender, msg):
+        """Add message to chat"""
+        self.chat.config(state=tk.NORMAL)
+        
+        time = datetime.now().strftime("%H:%M:%S")
+        
+        if sender == "user":
+            self.chat.insert(tk.END, f"\n[{time}] You:\n", "user")
+        elif sender == "assistant":
+            self.chat.insert(tk.END, f"\n[{time}] DeepNova:\n", "assistant")
+        else:
+            self.chat.insert(tk.END, f"\n[{time}] System:\n", "system")
+        
+        self.chat.insert(tk.END, f"{msg}\n")
+        self.chat.insert(tk.END, "-" * 50 + "\n")
+        self.chat.see(tk.END)
+        self.chat.config(state=tk.DISABLED)
+    
+    def update_status(self, msg, is_error=False):
+        """Update status bar"""
+        self.status_msg.config(text=msg)
+        if is_error:
+            self.status_msg.config(fg="red")
+            self.root.after(3000, lambda: self.status_msg.config(fg="#666666"))
+    
+    def update_memory(self):
+        """Update memory info"""
+        try:
+            if self.deepnova:
+                stats = self.deepnova.get_stats()
+                self.mem_label.config(
+                    text=f"Msgs: {stats.get('total_messages', 0)} | "
+                         f"Learned: {stats.get('learning', {}).get('total_learned', 0)}"
+                )
+        except:
+            pass
+        self.root.after(5000, self.update_memory)
+    
+    def auto_load(self):
+        """Auto load model"""
+        if not self.model_loaded and not self.loading:
+            self.load_model()
+    
+    def load_model(self):
+        """Load model"""
+        if self.loading:
+            return
+        
+        self.loading = True
+        self.update_status("Loading model...")
+        self.status_dot.config(fg="#ff9800")
+        self.status_text.config(text="Loading")
+        self.load_btn.config(state=tk.DISABLED, text="Loading...")
+        
+        def load():
+            try:
+                if self.model_size.get() == "lite":
+                    args = ModelArgs.deepseek_v3_lite()
+                else:
+                    args = ModelArgs()
+                
+                args.device = get_best_device()
+                
+                tokenizer = ProductionTokenizer()
+                model = Transformer(args)
+                model = model.to(torch.device(args.device))
+                model.eval()
+                
+                self.deepnova = DeepNovaAI(model, tokenizer, args)
+                self.model_loaded = True
+                
+                self.root.after(0, self.on_load_success)
+                
+            except Exception as e:
+                self.root.after(0, lambda: self.on_load_error(str(e)))
+            
+            finally:
+                self.loading = False
+        
+        threading.Thread(target=load, daemon=True).start()
+    
+    def on_load_success(self):
+        """Handle load success"""
+        self.update_status("Model ready")
+        self.status_dot.config(fg="#4caf50")
+        self.status_text.config(text="Ready")
+        self.load_btn.config(state=tk.NORMAL, text="Load Model")
+        
+        info = self.deepnova.get_model_info()
+        self.model_info.delete(1.0, tk.END)
+        self.model_info.insert(tk.END, f"Params: {info.get('total_params_formatted', 'N/A')}\n")
+        self.model_info.insert(tk.END, f"Active: {info.get('active_params_formatted', 'N/A')}\n")
+        self.model_info.insert(tk.END, f"Experts: {info.get('n_experts', 'N/A')}")
+        
+        self.add_message("system", "Model loaded successfully!")
+    
+    def on_load_error(self, error):
+        """Handle load error"""
+        self.model_loaded = False
+        self.update_status(f"Error: {error[:30]}", True)
+        self.status_dot.config(fg="#f44336")
+        self.status_text.config(text="Error")
+        self.load_btn.config(state=tk.NORMAL, text="Load Model")
+        messagebox.showerror("Error", f"Failed to load model:\n{error}")
+    
+    def send(self):
+        """Send message"""
+        if not self.model_loaded:
+            messagebox.showwarning("Warning", "Please load model first")
+            return
+        
+        if self.generating:
+            return
+        
+        msg = self.input.get(1.0, tk.END).strip()
+        if not msg:
+            return
+        
+        self.input.delete(1.0, tk.END)
+        self.add_message("user", msg)
+        
+        if msg.startswith('/'):
+            self.handle_command(msg)
+            return
+        
+        self.generating = True
+        self.stop_flag = False
+        self.send_btn.config(state=tk.DISABLED)
+        self.stop_btn.config(state=tk.NORMAL)
+        self.update_status("Generating...")
+        
+        def generate():
+            try:
+                resp = self.deepnova.chat(
+                    msg,
+                    max_new_tokens=self.max_tokens.get(),
+                    temperature=self.temp.get()
+                )
+                if not self.stop_flag:
+                    self.root.after(0, lambda: self.add_message("assistant", resp))
+            except Exception as e:
+                self.root.after(0, lambda: self.add_message("system", f"Error: {e}"))
+            finally:
+                self.root.after(0, self.on_done)
+        
+        threading.Thread(target=generate, daemon=True).start()
+    
+    def on_done(self):
+        """Handle generation done"""
+        self.generating = False
+        self.send_btn.config(state=tk.NORMAL)
+        self.stop_btn.config(state=tk.DISABLED)
+        self.update_status("Ready")
+        self.update_memory()
+    
+    def stop(self):
+        """Stop generation"""
+        self.stop_flag = True
+        self.update_status("Stopping...")
+        self.add_message("system", "Generation stopped")
+    
+    def handle_command(self, cmd):
+        """Handle slash commands"""
+        parts = cmd[1:].split(maxsplit=1)
+        command = parts[0].lower()
+        arg = parts[1] if len(parts) > 1 else ""
+        
+        if command == "clear":
+            self.chat.config(state=tk.NORMAL)
+            self.chat.delete(1.0, tk.END)
+            self.chat.config(state=tk.DISABLED)
+            self.add_message("system", "Chat cleared")
+        
+        elif command == "stats":
+            self.stats()
+        
+        elif command == "learn":
+            if arg:
+                result = self.deepnova.learn(arg)
+                if result.get('success'):
+                    self.add_message("system", f"Learned: {result['summary'][:100]}")
+                else:
+                    self.add_message("system", f"Failed: {result.get('error', 'Unknown')}")
+            else:
+                self.add_message("system", "Usage: /learn <text>")
+        
+        elif command == "recall":
+            if arg:
+                results = self.deepnova.recall(arg, top_k=3)
+                if results:
+                    self.add_message("system", f"Found {len(results)} items:")
+                    for r in results:
+                        self.add_message("system", f"- {r['summary']}")
+                else:
+                    self.add_message("system", "No results")
+            else:
+                self.add_message("system", "Usage: /recall <query>")
+        
+        elif command == "help":
+            help_text = "Commands:\n/clear - Clear chat\n/stats - Show stats\n/learn <text> - Learn\n/recall <query> - Search\n/help - This help"
+            self.add_message("system", help_text)
+        
+        else:
+            self.add_message("system", f"Unknown: {command}. Type /help")
+    
+    def learn_file(self):
+        """Learn from file"""
+        if not self.model_loaded:
+            messagebox.showwarning("Warning", "Please load model first")
+            return
+        
+        path = filedialog.askopenfilename(
+            title="Select File",
+            filetypes=[("Text files", "*.txt *.md"), ("All", "*.*")]
+        )
+        if path:
+            self.update_status(f"Learning from {os.path.basename(path)}...")
+            
+            def learn():
+                try:
+                    results = self.deepnova.learn_from_file(path)
+                    success = len([r for r in results if r.get('success')])
+                    self.root.after(0, lambda: self.add_message("system", f"Learned {success} segments from {os.path.basename(path)}"))
+                except Exception as e:
+                    self.root.after(0, lambda: self.add_message("system", f"Error: {e}"))
+                finally:
+                    self.root.after(0, lambda: self.update_status("Ready"))
+            
+            threading.Thread(target=learn, daemon=True).start()
+    
+    def recall(self):
+        """Recall knowledge"""
+        if not self.model_loaded:
+            messagebox.showwarning("Warning", "Please load model first")
+            return
+        
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Recall Knowledge")
+        dialog.geometry("500x400")
+        dialog.configure(bg="#ffffff")
+        
+        tk.Label(dialog, text="Enter query:", bg="#ffffff", font=("Segoe UI", 11)).pack(pady=10)
+        
+        entry = tk.Text(dialog, height=3, font=("Segoe UI", 10), wrap=tk.WORD)
+        entry.pack(fill=tk.X, padx=20, pady=5)
+        
+        result = scrolledtext.ScrolledText(dialog, height=12, font=("Segoe UI", 10),
+                                           wrap=tk.WORD, bg="#f5f5f5")
+        result.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        def search():
+            query = entry.get(1.0, tk.END).strip()
+            if not query:
+                return
+            result.delete(1.0, tk.END)
+            result.insert(tk.END, "Searching...\n")
+            
+            def search_thread():
+                try:
+                    res = self.deepnova.recall(query, top_k=5)
+                    self.root.after(0, lambda: display(res))
+                except Exception as e:
+                    self.root.after(0, lambda: result.insert(tk.END, f"Error: {e}"))
+            
+            def display(res):
+                result.delete(1.0, tk.END)
+                if res:
+                    for i, r in enumerate(res):
+                        result.insert(tk.END, f"{i+1}. Score: {r['score']:.2f}\n")
+                        result.insert(tk.END, f"   {r['summary']}\n")
+                        if r.get('source'):
+                            result.insert(tk.END, f"   Source: {r['source']}\n")
+                        result.insert(tk.END, "\n")
+                else:
+                    result.insert(tk.END, "No results found.")
+            
+            threading.Thread(target=search_thread, daemon=True).start()
+        
+        tk.Button(dialog, text="Search", command=search,
+                 bg="#2196f3", fg="white", font=("Segoe UI", 10),
+                 padx=20, pady=5, relief="flat").pack(pady=10)
+    
+    def stats(self):
+        """Show statistics"""
+        if not self.model_loaded:
+            messagebox.showwarning("Warning", "Please load model first")
+            return
+        
+        stats = self.deepnova.get_stats()
+        
+        text = f"""
+DeepNova Statistics
+{'='*40}
+
+Model: {stats.get('name', 'N/A')}
+Version: {stats.get('version', 'N/A')}
+Uptime: {stats.get('uptime_seconds', 0):.0f} sec
+
+Messages: {stats.get('total_messages', 0)}
+Tokens Generated: {stats.get('total_tokens_generated', 0)}
+Tokens Saved: {stats.get('total_tokens_saved', 0)}
+
+Memory:
+  Short-term: {stats.get('memory', {}).get('short_term_messages', 0)}
+  Important Facts: {stats.get('memory', {}).get('important_facts', 0)}
+  Entities: {stats.get('memory', {}).get('entities_tracked', 0)}
+
+Knowledge:
+  Learned: {stats.get('learning', {}).get('total_learned', 0)}
+  Graph Nodes: {stats.get('learning', {}).get('knowledge_graph_nodes', 0)}
+
+Features: {', '.join(stats.get('active_features', []))}
+"""
+        messagebox.showinfo("Statistics", text)
+    
+    def clear_memory(self):
+        """Clear memory"""
+        if self.deepnova:
+            self.deepnova.clear_context(keep_important=True)
+            self.add_message("system", "Memory cleared (keeping important facts)")
+            self.update_memory()
+    
+    def run(self):
+        """Run application"""
+        def on_close():
+            cleanup_memory()
+            self.root.destroy()
+        
+        self.root.protocol("WM_DELETE_WINDOW", on_close)
+        self.root.mainloop()
+
+
+if __name__ == "__main__":
+    app = DeepNovaApp()
+    app.run()

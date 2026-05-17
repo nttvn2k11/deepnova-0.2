@@ -1,0 +1,36 @@
+# DeepNova AI - pinned Python dependencies
+# Python >= 3.9
+
+torch==2.1.0
+torchvision==0.16.0
+torchaudio==2.1.0
+
+transformers==4.36.0
+sentencepiece==0.1.99
+tokenizers==0.15.0
+
+numpy==1.24.0
+tqdm==4.66.0
+psutil==5.9.0
+safetensors==0.4.0
+
+flask==2.3.0
+flask-cors==4.0.0
+
+# Optional/experimental packages (uncomment to install)
+# bitsandbytes==0.42.0        # 8-bit optimizations / quantization
+# deepspeed==0.12.0           # distributed training
+# fastapi==0.104.0
+# uvicorn==0.24.0
+# wandb==0.16.0               # logging/monitoring
+# tensorboard==2.14.0
+# einops==0.7.0
+# flash-attn==2.3.0           # faster attention (may require build env)
+# triton==2.1.0               # custom CUDA kernels
+# megablocks==0.6.0           # MoE fused kernels
+
+# Notes:
+# - For GPU support, install appropriate torch wheel for your CUDA version
+#   (see https://pytorch.org/get-started/locally/). Example:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+# - Some optional packages require compilation or specific CUDA/toolkit versions.
