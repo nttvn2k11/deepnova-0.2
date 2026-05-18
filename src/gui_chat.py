@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-DeepNova Chat - Simple Chat Interface
-White background, blue buttons, easy to customize
-"""
 
 import tkinter as tk
 from tkinter import scrolledtext, messagebox, filedialog, ttk

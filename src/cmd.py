@@ -415,9 +415,11 @@ print(f"Output shape: {output.shape}")
     # ============ CMD Functions ============
     
     def log_to_cmd(self, message, msg_type="output"):
-        """Log message to CMD display"""
+        """Log message to CMD display with clean newline formatting."""
         self.cmd_display.config(state=tk.NORMAL)
-        self.cmd_display.insert(tk.END, f"{message}\n", msg_type)
+        text = "" if message is None else str(message)
+        for line in text.replace("\r\n", "\n").split("\n"):
+            self.cmd_display.insert(tk.END, f"{line}\n", msg_type)
         self.cmd_display.see(tk.END)
         self.cmd_display.config(state=tk.DISABLED)
     
@@ -443,6 +445,7 @@ print(f"Output shape: {output.shape}")
         self.history_index = len(self.cmd_history)
         
         # Log command
+        logger.info("CMD input: %s", cmd)
         self.cmd_display.config(state=tk.NORMAL)
         self.cmd_display.insert(tk.END, f"{self.current_dir}> {cmd}\n", "cmd")
         self.cmd_display.config(state=tk.DISABLED)
@@ -504,6 +507,7 @@ print(f"Output shape: {output.shape}")
     
     def run_system_command(self, cmd):
         """Run system command"""
+        logger.info("Executing system command: %s", cmd)
         def run():
             try:
                 process = subprocess.Popen(
@@ -514,8 +518,10 @@ print(f"Output shape: {output.shape}")
                 stdout, stderr = process.communicate(timeout=30)
                 
                 if stdout:
+                    logger.debug("CMD stdout: %s", stdout.rstrip())
                     self.root.after(0, lambda: self.log_to_cmd(stdout.rstrip(), "output"))
                 if stderr:
+                    logger.warning("CMD stderr: %s", stderr.rstrip())
                     self.root.after(0, lambda: self.log_to_cmd(stderr.rstrip(), "error"))
                 if process.returncode != 0:
                     self.root.after(0, lambda: self.log_to_cmd(f"Exit code: {process.returncode}", "error"))
@@ -523,6 +529,7 @@ print(f"Output shape: {output.shape}")
             except subprocess.TimeoutExpired:
                 self.root.after(0, lambda: self.log_to_cmd("Command timeout (30s)", "error"))
             except Exception as e:
+                logger.error("CMD execution failed: %s", e)
                 self.root.after(0, lambda: self.log_to_cmd(f"Error: {e}", "error"))
         
         threading.Thread(target=run, daemon=True).start()
@@ -561,14 +568,17 @@ print(f"Output shape: {output.shape}")
             files_only = [f for f in files if os.path.isfile(os.path.join(self.current_dir, f))]
             
             self.log_to_cmd(f"\nDirectory: {self.current_dir}", "info")
-            self.log_to_cmd("-" * 50, "output")
+            self.log_to_cmd("-" * 72, "output")
+            self.log_to_cmd(f"{'TYPE':<8}{'NAME':<40}{'SIZE':>16}", "info")
+            self.log_to_cmd("-" * 72, "output")
             
             for d in sorted(dirs):
-                self.log_to_cmd(f"[DIR]  {d}", "info")
+                self.log_to_cmd(f"{'[DIR]':<8}{d:<40}", "info")
             for f in sorted(files_only):
                 size = os.path.getsize(os.path.join(self.current_dir, f))
-                self.log_to_cmd(f"       {f} ({self.format_size(size)})", "output")
+                self.log_to_cmd(f"{'[FILE]':<8}{f:<40}{self.format_size(size):>16}", "output")
             
+            self.log_to_cmd("-" * 72, "output")
             self.log_to_cmd(f"\n{len(dirs)} dir(s), {len(files_only)} file(s)", "info")
         except Exception as e:
             self.log_to_cmd(f"Error: {e}", "error")

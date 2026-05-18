@@ -1,5 +1,6 @@
 
 
+import argparse
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox, filedialog
 import threading
@@ -12,7 +13,9 @@ try:
     from model import (
         DeepNovaAI, Transformer, ProductionTokenizer, ModelArgs,
         load_model, get_best_device, get_memory_info,
-        cleanup_memory, logger, torch
+        cleanup_memory, logger, torch, interactive_mode,
+        learn_mode, recall_mode, stats_mode, clear_mode,
+        export_mode, list_mode, generate_mode, train_mode
     )
     MODEL_OK = True
 except ImportError as e:
@@ -587,6 +590,219 @@ Features: {', '.join(stats.get('active_features', []))}
         self.root.mainloop()
 
 
+def resolve_model_args(model_size: str = "lite", device: str = None) -> ModelArgs:
+    if model_size == 'max' or model_size == '671b':
+        model_args = ModelArgs.deepnova_max()
+    elif model_size == 'pro':
+        model_args = ModelArgs.deepnova_pro()
+    elif model_size in ('instans', 'parallel'):
+        model_args = ModelArgs.deepnova_instans()
+    elif model_size == 'lite':
+        model_args = ModelArgs.deepnova_lite()
+    else:
+        model_args = ModelArgs()
+
+    if device:
+        model_args.device = device
+    return model_args
+
+
+def create_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="DeepNova AI launcher with desktop GUI and CLI subcommands"
+    )
+    subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
+
+    gui_parser = subparsers.add_parser("gui", help="Launch the desktop GUI")
+    gui_parser.add_argument("--model-path", default=None, help="Path to model checkpoint directory")
+    gui_parser.add_argument("--memory-file", default="deepnova_memory.json", help="Memory file path")
+    gui_parser.add_argument("--device", default=None, help="Device: auto, cpu, cuda, mps")
+    gui_parser.add_argument("--model-size", default="lite", choices=["lite", "instans", "pro", "max", "base", "large", "671b"], help="Model configuration")
+
+    chat_parser = subparsers.add_parser("chat", help="Interactive CLI chat mode")
+    chat_parser.add_argument("--model-path", default=None, help="Path to model checkpoint directory")
+    chat_parser.add_argument("--memory-file", default="deepnova_memory.json", help="Memory file path")
+    chat_parser.add_argument("--device", default=None, help="Device: auto, cpu, cuda, mps")
+    chat_parser.add_argument("--model-size", default="lite", choices=["lite", "instans", "pro", "max", "base", "large", "671b"], help="Model configuration")
+    chat_parser.add_argument("--assistant-style", choices=["deepnova", "gemini", "claude"], default="deepnova", help="Assistant style hint")
+
+    generate_parser = subparsers.add_parser("generate", help="Generate text from a prompt")
+    generate_parser.add_argument("--prompt", required=True, help="Prompt text to generate from")
+    generate_parser.add_argument("--model-path", default=None, help="Path to model checkpoint directory")
+    generate_parser.add_argument("--device", default=None, help="Device: auto, cpu, cuda, mps")
+    generate_parser.add_argument("--memory-file", default="deepnova_memory.json", help="Memory file path")
+    generate_parser.add_argument("--model-size", default="lite", choices=["lite", "instans", "pro", "max", "base", "large", "671b"], help="Model configuration")
+    generate_parser.add_argument("--temperature", type=float, default=0.7, help="Sampling temperature")
+    generate_parser.add_argument("--max-tokens", type=int, default=500, help="Maximum new tokens")
+    generate_parser.add_argument("--assistant-style", choices=["deepnova", "gemini", "claude"], default="deepnova", help="Assistant style hint")
+
+    tokenize_parser = subparsers.add_parser("tokenize", help="Encode text into token IDs")
+    tokenize_parser.add_argument("--text", required=True, help="Text to tokenize")
+    tokenize_parser.add_argument("--add-special-tokens", action="store_true", help="Add BOS/EOS tokens")
+
+    detokenize_parser = subparsers.add_parser("detokenize", help="Decode token IDs into text")
+    detokenize_parser.add_argument("--ids", required=True, nargs="+", type=int, help="Token IDs to decode")
+
+    learn_parser = subparsers.add_parser("learn", help="Learn from text, file, or directory")
+    learn_parser.add_argument("--text", type=str, help="Text to learn")
+    learn_parser.add_argument("--file", type=str, help="File path to learn from")
+    learn_parser.add_argument("--directory", type=str, help="Directory path to learn from")
+    learn_parser.add_argument("--model-path", default=None, help="Path to model checkpoint directory")
+    learn_parser.add_argument("--device", default=None, help="Device: auto, cpu, cuda, mps")
+    learn_parser.add_argument("--model-size", default="lite", choices=["lite", "instans", "pro", "max", "base", "large", "671b"], help="Model configuration")
+
+    recall_parser = subparsers.add_parser("recall", help="Recall learned knowledge")
+    recall_parser.add_argument("--query", required=True, help="Query text to recall")
+    recall_parser.add_argument("--top-k", type=int, default=5, help="Number of relevant items")
+    recall_parser.add_argument("--model-path", default=None, help="Path to model checkpoint directory")
+    recall_parser.add_argument("--device", default=None, help="Device: auto, cpu, cuda, mps")
+    recall_parser.add_argument("--model-size", default="lite", choices=["lite", "instans", "pro", "max", "base", "large", "671b"], help="Model configuration")
+
+    stats_parser = subparsers.add_parser("stats", help="Show model statistics")
+    stats_parser.add_argument("--model-path", default=None, help="Path to model checkpoint directory")
+    stats_parser.add_argument("--device", default=None, help="Device: auto, cpu, cuda, mps")
+    stats_parser.add_argument("--model-size", default="lite", choices=["lite", "instans", "pro", "max", "base", "large", "671b"], help="Model configuration")
+
+    clear_parser = subparsers.add_parser("clear", help="Clear conversation/context memory")
+    clear_parser.add_argument("--all", action="store_true", help="Clear all memory including facts")
+    clear_parser.add_argument("--model-path", default=None, help="Path to model checkpoint directory")
+    clear_parser.add_argument("--device", default=None, help="Device: auto, cpu, cuda, mps")
+    clear_parser.add_argument("--model-size", default="lite", choices=["lite", "instans", "pro", "max", "base", "large", "671b"], help="Model configuration")
+
+    export_parser = subparsers.add_parser("export", help="Export learned knowledge to file")
+    export_parser.add_argument("--output", default="knowledge_export.json", help="Output file path")
+    export_parser.add_argument("--model-path", default=None, help="Path to model checkpoint directory")
+    export_parser.add_argument("--device", default=None, help="Device: auto, cpu, cuda, mps")
+    export_parser.add_argument("--model-size", default="lite", choices=["lite", "instans", "pro", "max", "base", "large", "671b"], help="Model configuration")
+
+    list_parser = subparsers.add_parser("list", help="List learned texts")
+    list_parser.add_argument("--limit", type=int, default=20, help="Maximum items to list")
+    list_parser.add_argument("--model-path", default=None, help="Path to model checkpoint directory")
+    list_parser.add_argument("--device", default=None, help="Device: auto, cpu, cuda, mps")
+    list_parser.add_argument("--model-size", default="lite", choices=["lite", "instans", "pro", "max", "base", "large", "671b"], help="Model configuration")
+
+    train_parser = subparsers.add_parser("train", help="Train the model")
+    train_parser.add_argument("--data", required=True, help="Path to training data")
+    train_parser.add_argument("--epochs", type=int, default=1, help="Number of epochs")
+    train_parser.add_argument("--batch-size", type=int, default=8, help="Training batch size")
+    train_parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate")
+    train_parser.add_argument("--checkpoint-dir", default="./checkpoints", help="Checkpoint directory")
+    train_parser.add_argument("--model-size", default="lite", choices=["lite", "instans", "pro", "max", "base", "large", "671b"], help="Model configuration")
+
+    info_parser = subparsers.add_parser("info", help="Show model and device information")
+    info_parser.add_argument("--model-path", default=None, help="Path to model checkpoint directory")
+    info_parser.add_argument("--device", default=None, help="Device: auto, cpu, cuda, mps")
+    info_parser.add_argument("--model-size", default="lite", choices=["lite", "instans", "pro", "max", "base", "large", "671b"], help="Model configuration")
+
+    parser.set_defaults(command="gui")
+    return parser
+
+
+def build_model(args: argparse.Namespace):
+    model_args = resolve_model_args(getattr(args, "model_size", "lite"), getattr(args, "device", None))
+    model = Transformer(model_args)
+
+    model_path = getattr(args, "model_path", None)
+    if model_path and os.path.exists(model_path):
+        try:
+            model, model_args = load_model(model_path, model_args.device)
+            logger.info("Model loaded from %s", model_path)
+        except Exception as e:
+            logger.warning("Failed to load model from %s, using initialized model: %s", model_path, e)
+    return model, model_args
+
+
+def run_cli_chat(args: argparse.Namespace) -> None:
+    model, model_args = build_model(args)
+    tokenizer = ProductionTokenizer()
+    deepnova = DeepNovaAI(model, tokenizer, model_args, memory_file=args.memory_file)
+
+    if getattr(args, "assistant_style", "deepnova") != "deepnova":
+        deepnova.system_prompt += f"\n\nAssistant style: {args.assistant_style.title()}. Respond in a professional and concise way."
+
+    logger.info("Starting CLI chat mode with style=%s", args.assistant_style)
+    interactive_mode(deepnova)
+
+
+def run_cli_generate(args: argparse.Namespace) -> None:
+    model, model_args = build_model(args)
+    tokenizer = ProductionTokenizer()
+    deepnova = DeepNovaAI(model, tokenizer, model_args, memory_file=args.memory_file)
+
+    if getattr(args, "assistant_style", "deepnova") != "deepnova":
+        deepnova.system_prompt += f"\n\nAssistant style: {args.assistant_style.title()}. Respond in a professional and concise way."
+
+    response = deepnova.chat(
+        args.prompt,
+        max_new_tokens=args.max_tokens,
+        temperature=args.temperature,
+    )
+    logger.info("Generated response: %d tokens", len(tokenizer.encode(response, add_special_tokens=False)))
+    print(response)
+
+
+def run_cli_tokenize(args: argparse.Namespace) -> None:
+    tokenizer = ProductionTokenizer()
+    ids = tokenizer.encode(args.text, add_special_tokens=args.add_special_tokens)
+    print("Token IDs:", ids)
+    print("Token count:", len(ids))
+
+
+def run_cli_detokenize(args: argparse.Namespace) -> None:
+    tokenizer = ProductionTokenizer()
+    text = tokenizer.decode(args.ids)
+    print(text)
+
+
+def run_cli_info(args: argparse.Namespace) -> None:
+    model_args = resolve_model_args(getattr(args, "model_size", "lite"), getattr(args, "device", None))
+    print("Model information:")
+    print("  Model size:", getattr(args, "model_size", "lite"))
+    print("  Device:", model_args.device)
+    print("  Vocab size:", getattr(model_args, "vocab_size", "unknown"))
+    print("  Max sequence length:", getattr(model_args, "max_seq_len", "unknown"))
+    print("  Parallel MoE+Dense:", getattr(model_args, "use_parallel_moe_dense", False))
+    print("  GLM enabled:", getattr(model_args, "use_glm", False))
+    print("  Adaptive router:", getattr(model_args, "use_adaptive_router", False))
+    print("  Multi-token prediction:", getattr(model_args, "use_multi_token_prediction", False))
+    model_path = getattr(args, "model_path", None)
+    if model_path:
+        print("  Model path:", model_path)
+
+
 if __name__ == "__main__":
-    app = DeepNovaApp()
-    app.run()
+    parser = create_parser()
+    args = parser.parse_args()
+    command = getattr(args, "command", "gui") or "gui"
+
+    logger.info("DeepNova App launching command=%s", command)
+
+    if command == "gui":
+        app = DeepNovaApp()
+        app.run()
+    elif command == "chat":
+        run_cli_chat(args)
+    elif command == "generate":
+        run_cli_generate(args)
+    elif command == "tokenize":
+        run_cli_tokenize(args)
+    elif command == "detokenize":
+        run_cli_detokenize(args)
+    elif command == "learn":
+        learn_mode(args)
+    elif command == "recall":
+        recall_mode(args)
+    elif command == "stats":
+        stats_mode(args)
+    elif command == "clear":
+        clear_mode(args)
+    elif command == "export":
+        export_mode(args)
+    elif command == "list":
+        list_mode(args)
+    elif command == "train":
+        train_mode(args)
+    elif command == "info":
+        run_cli_info(args)
+    else:
+        parser.print_help()

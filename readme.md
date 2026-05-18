@@ -221,7 +221,20 @@ cat-ai/
 Quick Start Commands:
 
 Desktop GUI:
-    python src/app/app.py
+    python src/app.py
+
+Command-line App:
+    python src/app.py chat
+    python src/app.py generate --prompt "Hello, DeepNova!"
+    python src/app.py learn --text "DeepNova remembers this text"
+    python src/app.py recall --query "DeepNova" --top-k 5
+    python src/app.py stats
+    python src/app.py clear --all
+    python src/app.py export --output knowledge.json
+    python src/app.py list --limit 10
+    python src/app.py tokenize --text "Hello world"
+    python src/app.py detokenize --ids 1 2 3 4
+    python src/app.py info --model-size lite
 
 Simple Chat:
     python src/gui/gui_chat.py
@@ -230,7 +243,7 @@ VSCode GUI:
     python src/gui/gui_setting.py
 
 Web Server:
-    python src/web/web.py
+    python src/web.py
 
 Dev Tool:
     python src/cmd/cmd.py
